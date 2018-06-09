@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Daum 지도 시작하기</title>
+    <style>
+        .center{
+            margin: auto;
+            text-align:center;
+        }
+    </style>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e1acecebf46d57ed7e9d58a90f864374"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e1acecebf46d57ed7e9d58a90f864374&libraries=services"></script>
+</head>
+<body>
+    <div class="center">
+        <h1>Daum Navi Viewer Loading...</h1>
+        <script>
+            startStr = '{{start}}'
+            destStr = '{{dest}}'
+            splitedStartStr = startStr.split(',');
+            splitedDestStr = destStr.split(',');
+            var latlng = new daum.maps.LatLng(parseFloat(splitedStartStr[0]), parseFloat(splitedStartStr[1]));
+            var latlng1 = new daum.maps.LatLng(parseFloat(splitedDestStr[0]), parseFloat(splitedDestStr[1]));
+
+            var latlngStr = latlng.toCoords().toString();
+            var latlng1Str = latlng1.toCoords().toString();
+            latlngStr = latlngStr.substring(1,latlngStr.length-1)
+            latlng1Str = latlng1Str.substring(1,latlng1Str.length-1)
+
+             location.replace('http://map.daum.net/?target=car&rt=' + latlngStr + ',' + latlng1Str);
+        </script>
+        </div>
+</body>
+</html>
