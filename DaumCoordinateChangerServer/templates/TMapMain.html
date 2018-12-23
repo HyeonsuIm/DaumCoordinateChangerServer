@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>TMapViewer</title>
+        <script src="https://api2.sktelecom.com/tmap/js?version=1&format=javascript&appKey=dc65b12b-9750-4e55-a14b-54d192a0f496"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="{{
+        url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
+
+        <script src="/static/script/TMap/TMapScript.js"></script>
+        <script src="/static/script/TMap/MarkerHandler.js"></script>
+        <link rel="stylesheet" href="/static/CSS/TMapCSS.css">
+    </head>
+    <body>
+        <div id="header">
+
+        </div>
+        <div id="left">
+
+        </div>
+        <div id="tmap_main_frame">
+            <div id="tmap_head">
+                <img id=tmap_main_icon src="/static/Image/TMap_icon.png" />
+                <input type="text" id="searchQuery">
+                <p id="result"></p>
+                <button id="tmap_route_start_btn" Onclick="Search()"/>
+            </div>
+            <div id="map_div"></div>
+        </div>
+    </body>
+
+    <script>
+        var startStr = '{{start}}'
+        var destStr = '{{dest}}'
+        var splitedStartStr = startStr.split(',');
+        var splitedDestStr = destStr.split(',');
+
+        initTmap();
+        CalculateRoute(splitedStartStr[1], splitedStartStr[0], splitedDestStr[1], splitedDestStr[0]);
+    </script>
+</html>
