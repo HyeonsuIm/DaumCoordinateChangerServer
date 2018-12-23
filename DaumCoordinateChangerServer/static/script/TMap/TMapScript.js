@@ -16,8 +16,6 @@ function initTmap(){
     map.addLayer(markerLayer);
 }
 
-var lastMarker;
-
 var size = new Tmap.Size(24, 38);
 var offset = new Tmap.Pixel(-(size.w / 2), -size.h);
 function OnMouseDown(e)
@@ -28,12 +26,8 @@ function OnMouseDown(e)
     }
 
     RemoveContextMenu()
-    RemoveMarker(lastMarker);
     var lonlat = map.getLonLatFromViewPortPx(e.xy).transform("EPSG:3857", "EPSG:4326");//클릭한 부분의 ViewPorPx를 LonLat로 변환합니다
-
-    var icon = new Tmap.IconHtml("<img src='http://tmapapis.sktelecom.com/upload/tmap/marker/pin_b_m_a.png' />", size, offset);
-    var marker = new Tmap.Marker(lonlat.transform("EPSG:4326", "EPSG:3857"), icon);
-    lastMarker = new MakeMarker(marker, lonlat);
+    SetLastMarker(lonlat);
 
     $("<div class='map-custom-menu'>" +
         "<button onclick='SetStartingPoint()'>출발</button>" +
@@ -42,8 +36,8 @@ function OnMouseDown(e)
     "</div>")
     .appendTo("body")
     .css({top: e.pageY + "px", left: e.pageX + "px"});
-    UpdateMarker(markerLayer);
 
+    RefreshView();
     e.preventDefault();
     return false;
 }
@@ -53,65 +47,31 @@ function RemoveContextMenu()
     $("div.map-custom-menu").remove();
 }
 
-var isSetStartPoint = false;
-var startPointLonLat;
-var startMarker;
 function SetStartingPoint(e)
 {
     RemoveContextMenu()
-    if( true == isSetStartPoint )
-    {
-        RemoveStartingPoint();
-    }
-    var icon = new Tmap.IconHtml("<img src='http://tmapapis.sktelecom.com/upload/tmap/marker/pin_r_m_s.png' />", size, offset)
-    startMarker = new Tmap.Marker(lastMarker.lonlat, icon);
-    markerLayer.addMarker(startMarker);
-    isSetStartPoint = true;
+    SetStartMarker();
 
     StartRoute();
+    RefreshView();
 }
 
-function RemoveStartingPoint()
-{
-    markerLayer.removeMarker(startMarker);
-    isSetStartPoint = false;
-}
-
-var isSetDestPoint = false;
-var destPointLonLat;
-var destMarker;
 function SetDestination()
 {
     RemoveContextMenu()
-    if( true == isSetDestPoint )
-    {
-        RemoveDestination();
-    }
-    var icon = new Tmap.IconHtml("<img src='http://tmapapis.sktelecom.com/upload/tmap/marker/pin_r_m_e.png' />", size, offset)
-    destMarker = new Tmap.Marker(lastMarker.lonlat, icon);
-    markerLayer.addMarker(destMarker);
-    isSetDestPoint = true;
+    SetDestMarker();
 
     StartRoute();
-}
-
-function RemoveDestination()
-{
-    markerLayer.removeMarker(destMarker);
-    isSetDestPoint = false;
-}
-
-function RemoveStartDest()
-{
-    RemoveStartingPoint();
-    RemoveDestination();
+    RefreshView();
 }
 
 var routeLayer;
 function StartRoute()
 {
-    if( false == isSetStartPoint ||
-        false == isSetDestPoint )
+    var startMarker = GetStartMarker();
+    var destMarker = GetDestMarker();
+    if( undefined == startMarker ||
+        undefined == destMarker )
     {
         return;
     }
@@ -119,14 +79,22 @@ function StartRoute()
     // 4. 경로 탐색 API 사용요청
     var pr_3857 = new Tmap.Projection("EPSG:3857");//EPSG:3857 좌표계 인스턴스 생성합니다.
     var pr_4326 = new Tmap.Projection("EPSG:4326");//EPSG:4326 좌표계 인스턴스 생성합니다.
-    var startLonLat = startMarker.lonlat.transform(pr_3857, pr_4326);
-    var destLonLat = destMarker.lonlat.transform(pr_3857, pr_4326);
+    var startLonLat = startMarker.lonlat;
+    var destLonLat = destMarker.lonlat;
     var startX = startLonLat.lon
     var startY = startLonLat.lat;
     var endX = destLonLat.lon;
     var endY = destLonLat.lat;
 
     CalculateRoute(startX, startY, endX, endY);
+}
+
+function RefreshView(){
+    //markerLayer.clearMarkers();
+    markers = GetAllMarkers();
+    for( marker of markers){
+        markerLayer.addMarker(marker);
+    }
 }
 
 function CalculateRoute(startX, startY, endX, endY)
@@ -144,7 +112,7 @@ function CalculateRoute(startX, startY, endX, endY)
                 startY : startY,
                 endX : endX,
                 endY : endY,
-                reqCoordType : "WGS84GEO",
+                reqCoordType : "EPSG3857",
                 resCoordType : "EPSG3857",
                 angle : "172",
                 searchOption : "0",
@@ -186,7 +154,6 @@ function CalculateRoute(startX, startY, endX, endY)
             var resultDiv = document.getElementById("result");
             resultDiv.innerHTML = tDistance + tTime;
 		    RemoveContextMenu();
-		    RemoveStartDest();
         },
         error:function(request,status,error){
             console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
