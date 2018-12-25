@@ -32,11 +32,12 @@ function OnMouseDown(e)
     $("<div class='map-custom-menu'>" +
         "<button onclick='SetStartingPoint()'>출발</button>" +
         "<br>" +
+        "<button onclick='SetWayPoint()'>경유</button>" +
+        "<br>" +
         "<button onclick='SetDestination()'>목적</button>" +
     "</div>")
     .appendTo("body")
     .css({top: e.pageY + "px", left: e.pageX + "px"});
-
     RefreshView();
     e.preventDefault();
     return false;
@@ -47,10 +48,44 @@ function RemoveContextMenu()
     $("div.map-custom-menu").remove();
 }
 
+var wayPointInfo = {
+    cnt:0
+};
+
+function AddWaypoint()
+{               
+    $("<p>" +
+        "<span style='color:darkcyan'>" +
+            "<i class='fas fa-ellipsis-v'></i>" +
+        "</span>" +
+        "<span>" +
+            "<input class='InputBox' id='WayPointInput_" + wayPointInfo.cnt++ + "'>" +
+        "</span>" +
+        "<span>" +
+            "<i class='far fa-times-circle'></i>" +
+        "</span>" +
+      "</p>")
+        .appendTo("#leftWayInput");
+}
+
+function RemoveWaypoint(id)
+{
+    $("<p>경유 <input class='InputBox' id='WayPointInput_" + wayPointInfo.cnt++ + "'></p>").appendTo($("#leftWayInput"));
+}
+
 function SetStartingPoint(e)
 {
-    RemoveContextMenu()
+    RemoveContextMenu();
     SetStartMarker();
+
+    StartRoute();
+    RefreshView();
+}
+
+function SetWayPoint()
+{
+    RemoveContextMenu();
+    SetWayMarker();
 
     StartRoute();
     RefreshView();
@@ -90,7 +125,7 @@ function StartRoute()
 }
 
 function RefreshView(){
-    //markerLayer.clearMarkers();
+    markerLayer.clearMarkers();
     markers = GetAllMarkers();
     for( marker of markers){
         markerLayer.addMarker(marker);
