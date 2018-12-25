@@ -54,23 +54,68 @@ var wayPointInfo = {
 
 function AddWaypoint()
 {               
-    $("<p>" +
+    $("<div class='waypointBoxView' sortid='" + wayPointInfo.cnt++ + "'>" +
         "<span style='color:darkcyan'>" +
-            "<i class='fas fa-ellipsis-v'></i>" +
+            "<i class='fas fa-ellipsis-v fa-lg'></i>" +
         "</span>" +
         "<span>" +
-            "<input class='InputBox' id='WayPointInput_" + wayPointInfo.cnt++ + "'>" +
+            " <input class='WayInputBox' id='WayPointInput'>" +
         "</span>" +
         "<span>" +
-            "<i class='far fa-times-circle'></i>" +
+            "<i class='far fa-times-circle fa-lg' onclick='RemoveWaypoint(this)'></i>" +
         "</span>" +
-      "</p>")
+      "</div>")
         .appendTo("#leftWayInput");
 }
 
-function RemoveWaypoint(id)
+function RemoveWaypoint(clickedTag)
 {
-    $("<p>경유 <input class='InputBox' id='WayPointInput_" + wayPointInfo.cnt++ + "'></p>").appendTo($("#leftWayInput"));
+    var wayPointList = $("#leftWayInput").children('div');
+    var sortId = clickedTag.parentNode.parentNode.getAttribute('sortid');
+    var index = 0;
+    for( ; index < wayPointList.length ; ++index)
+    {
+        if( wayPointList[index].getAttribute('sortid') == sortId )
+        {
+            break;
+        }
+    }
+    wayPointList[index].remove();
+    SortWaypoint();
+}
+
+function SortWaypoint()
+{
+//    var wayPointList = $("#leftWayInput").children('div');
+//    var currentSortId = 0;
+//    
+//    for( ; currentSortId < wayPointList.length ; ++currentSortId )
+//    {
+//        //get minimum sort id
+//        var minimumSortId = wayPointList[currentSortId].getAttribute('sortid');
+//        var minimumSortIdIdx = currentSortId;
+//        var checkIdx = currentSortId + 1;
+//        var isFind = false;
+//        for( ; checkIdx < wayPointList.length ; ++checkIdx)
+//        {
+//            if ( minimumSortId > wayPointList[checkIdx].getAttribute('sortid') )
+//            {
+//                minimumSortId = wayPointList[checkIdx].getAttribute('sortid');
+//                minimumSortIdIdx = checkIdx;
+//                break;
+//            }
+//        }
+//    }
+//    
+//    var index = 0;
+//    for( ; index < wayPointList.length ; ++index)
+//    {
+//        if( wayPointList[index].getAttribute('sortid') == sortId )
+//        {
+//            break;
+//        }
+//    }
+//    wayPointList[index].remove();
 }
 
 function SetStartingPoint(e)

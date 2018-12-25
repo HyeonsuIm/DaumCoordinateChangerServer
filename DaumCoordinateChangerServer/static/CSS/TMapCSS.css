@@ -53,7 +53,15 @@ div.map-custom-menu {
 
 .WayInputBox
 {
+    line-height : 1.3rem;
     border: 2px solid gray;
+}
+
+.waypointBoxView>span>i
+{
+    width:40px;
+    height:25px;
+    text-align:center;
 }
 
 p#result
