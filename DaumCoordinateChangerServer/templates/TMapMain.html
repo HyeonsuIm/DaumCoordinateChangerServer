@@ -65,6 +65,9 @@
         var splitedDestStr = destStr.split(',');
 
         initTmap();
-        CalculateRoute(splitedStartStr[1], splitedStartStr[0], splitedDestStr[1], splitedDestStr[0]);
+        if( splitedStartStr != "" && splitedDestStr != "" )
+        {
+            CalculateRoute(splitedStartStr[1], splitedStartStr[0], splitedDestStr[1], splitedDestStr[0]);
+        }
     </script>
 </html>

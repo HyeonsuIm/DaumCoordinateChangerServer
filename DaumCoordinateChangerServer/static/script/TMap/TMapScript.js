@@ -150,6 +150,7 @@ function StartRoute()
 {
     var startMarker = GetStartMarker();
     var destMarker = GetDestMarker();
+    var wayMarkers = GetWayMarkers();
     if( undefined == startMarker ||
         undefined == destMarker )
     {
@@ -161,58 +162,127 @@ function StartRoute()
     var pr_4326 = new Tmap.Projection("EPSG:4326");//EPSG:4326 좌표계 인스턴스 생성합니다.
     var startLonLat = startMarker.lonlat;
     var destLonLat = destMarker.lonlat;
-    var startX = startLonLat.lon
-    var startY = startLonLat.lat;
-    var endX = destLonLat.lon;
-    var endY = destLonLat.lat;
-
-    CalculateRoute(startX, startY, endX, endY);
+    wayLonLatList = wayMarkers.map(function(x){return x.lonlat;});
+    CalculateRoute(startLonLat, wayLonLatList, destLonLat);
+    RefreshView();
 }
 
 function RefreshView(){
     markerLayer.clearMarkers();
-    markers = GetAllMarkers();
-    for( marker of markers){
-        markerLayer.addMarker(marker);
+    markerList = GetAllMarkers();
+    for( marker of markerList ){
+        markerLayer.addMarker(marker.marker);
+    }
+    
+    for( var index = 0 ; index < markerList.length ; ++index ){
+        var marker = markerList[index];
+        if( index == 0 ){
+            $("#StartPointInput").val(marker.lonlat.lat.toFixed(5)+ "," + marker.lonlat.lon.toFixed(5) );
+        }
+        else if( index == markerList.length - 1 ){
+            $("#DestinationPointInput").val(marker.lonlat.lat.toFixed(5)+ "," + marker.lonlat.lon.toFixed(5) );
+        }
+        else{
+            
+        }
+        
     }
 }
 
-function CalculateRoute(startX, startY, endX, endY)
+function CalculateRoute(startLonLat, wayLonLatList, destLonLat)
 {
+    var startX = startLonLat.lon;
+    var startY = startLonLat.lat;
+    var endX = destLonLat.lon;
+    var endY = destLonLat.lat;
+    var viaPointList = wayLonLatList.map(function(x){
+        return {
+            "viaPointId" : "test01",//경유지 id
+            "viaPointName" : "nmae01",//경유지 명칭
+            "viaX" : x.lon.toString(),
+            "viaY" : x.lat.toString()};
+    });
+    
     var prtcl;
-    var headers = {};
-    headers["appKey"]="dc65b12b-9750-4e55-a14b-54d192a0f496";
+    var headers = {
+        "appKey" : "dc65b12b-9750-4e55-a14b-54d192a0f496",
+    };
+    
+    
+    var urlWithoutWayPoint = "https://api2.sktelecom.com/tmap/routes?version=1&format=xml";
+    var urlWithWayPoint = "https://api2.sktelecom.com/tmap/routes/routeSequential30?version=1&format=xml";
+    
+    var url;
+    var data; 
+    var trafficColors;
+    if( 0 == viaPointList.length ){
+        url = urlWithoutWayPoint;
+        data = {
+                "startX" : startX,
+                "startY" : startY,
+                "endX" : endX,
+                "endY" : endY,
+            
+                "reqCoordType" : "EPSG3857",
+                "resCoordType" : "EPSG3857",
+                "angle" : "172",
+                "searchOption" : 0,
+                "trafficInfo" : "Y"
+        };//교통정보 표출 옵션입니다.
+        
+        trafficColors = {
+            extractStyles:true,
+
+            /* 실제 교통정보가 표출되면 아래와 같은 Color로 Line이 생성됩니다. */
+            trafficDefaultColor:"#000000", //Default
+            trafficType1Color:"#009900", //원할
+            trafficType2Color:"#FFC000", //지체
+            trafficType3Color:"#FF0000", //정체
+        };
+    }
+    else{
+        url = urlWithWayPoint;
+        data = JSON.stringify({
+                "startName" : "출발지",
+                "startX" : startX.toString(),
+                "startY" : startY.toString(),
+                "startTime" : "201708081103",//출발 시간(YYYYMMDDHHMM)
+                
+                "endName" : "목적지",
+                "endX" : endX.toString(),
+                "endY" : endY.toString(),
+            
+                "viaPoints" : viaPointList,
+            
+                "reqCoordType" : "EPSG3857",
+                "resCoordType" : "EPSG3857",
+                "angle" : "172",
+                "searchOption" : "0",
+                "trafficInfo" : "Y"
+       });//교통정보 표출 옵션입니다.
+        headers["Content-Type"] = "application/json";
+        
+        trafficColors = {
+            extractStyles:true,
+
+            /* 실제 교통정보가 표출되면 아래와 같은 Color로 Line이 생성됩니다. */
+            trafficDefaultColor:"#FF0000", //Default
+            trafficType1Color:"#009900", //원할
+            trafficType2Color:"#FFC000", //지체
+            trafficType3Color:"#FF0000", //정체
+        };
+    }
+    
     $.ajax({
-            method:"POST",
-            headers : headers,
-            url:"https://api2.sktelecom.com/tmap/routes?version=1&format=xml",//
-            async:false,
-            data:{
-                startX : startX,
-                startY : startY,
-                endX : endX,
-                endY : endY,
-                reqCoordType : "EPSG3857",
-                resCoordType : "EPSG3857",
-                angle : "172",
-                searchOption : "0",
-                trafficInfo : "Y" //교통정보 표출 옵션입니다.
-            },
-            success:function(response){
+        method:"POST",
+        headers : headers,
+        url:url,//
+        async:false,
+        data:data,
+        success:function(response){
                 prtcl = response;
 
             //5. 경로탐색 결과 Line 그리기
-            var trafficColors = {
-                    extractStyles:true,
-
-                    /* 실제 교통정보가 표출되면 아래와 같은 Color로 Line이 생성됩니다. */
-                    trafficDefaultColor:"#000000", //Default
-                    trafficType1Color:"#009900", //원할
-                    trafficType2Color:"#FFC000", //지체
-                    trafficType3Color:"#FF0000", //정체
-
-                };
-
             if( typeof routeLayer !== 'undefined'){
                 routeLayer.removeAllFeatures();//레이어의 모든 도형을 지웁니다.
             }

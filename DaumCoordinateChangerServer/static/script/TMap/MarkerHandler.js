@@ -1,5 +1,5 @@
 var markerList = [];
-
+var currentWayCnt = 0
 var MarkerType = {
     START   : 1,
     WAY     : 2,
@@ -73,15 +73,22 @@ function GetLastMarker(){
 
 
 var wayPntCnt = 0;
-function SetWayMarker(lonlat, idx){
+function SetWayMarker(){
     var icon = new Tmap.IconHtml("<img src='http://tmapapis.sktelecom.com/upload/tmap/marker/pin_b_m_a.png' />", size, offset);
     
-    var markerLonlat = lonlat.clone().transform("EPSG:4326", "EPSG:3857");
-    var marker = MakeMarker(new Tmap.Marker(markerLonlat, icon),
+    var lonlat = markerList.filter(function(x){return x.markerType == MarkerType.LAST})[0].lonlat
+    var tmapLonlat = lonlat.clone().transform("EPSG:4326", "EPSG:3857");
+    var marker = MakeMarker(new Tmap.Marker(tmapLonlat, icon),
                             lonlat,
                             MarkerType.WAY,
-                            idx);
+                            currentWayCnt++);
+    
     markerList.push(marker);
+}
+
+function GetWayMarkers(){
+    return markerList.filter(function(x){return x.markerType == MarkerType.WAY})
+                     .map(function(x){return x.marker});
 }
 
 function MakeMarker(tmapMarker, lonlat, markerType){
@@ -94,7 +101,7 @@ function MakeMarker(tmapMarker, lonlat, markerType, idx){
 }
 
 function GetAllMarkers(){
-    return markerList.map(function(x){return x.marker;});
+    return markerList;
 }
 
 function FindMarker(marker){
