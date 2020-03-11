@@ -9,8 +9,8 @@
             text-align:center;
         }
     </style>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e1acecebf46d57ed7e9d58a90f864374"></script>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e1acecebf46d57ed7e9d58a90f864374&libraries=services"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ff651637b771284b4fd9b6f4f78ac4c3"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ff651637b771284b4fd9b6f4f78ac4c3&libraries=services"></script>
 </head>
 <body>
     <div class="center">
@@ -20,8 +20,8 @@
             destStr = '{{dest}}'
             splitedStartStr = startStr.split(',');
             splitedDestStr = destStr.split(',');
-            var latlng = new daum.maps.LatLng(parseFloat(splitedStartStr[0]), parseFloat(splitedStartStr[1]));
-            var latlng1 = new daum.maps.LatLng(parseFloat(splitedDestStr[0]), parseFloat(splitedDestStr[1]));
+            var latlng = new kakao.maps.LatLng(parseFloat(splitedStartStr[0]), parseFloat(splitedStartStr[1]));
+            var latlng1 = new kakao.maps.LatLng(parseFloat(splitedDestStr[0]), parseFloat(splitedDestStr[1]));
 
             var latlngStr = latlng.toCoords().toString();
             var latlng1Str = latlng1.toCoords().toString();
