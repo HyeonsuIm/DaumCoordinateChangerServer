@@ -67,7 +67,11 @@
         initTmap();
         if( splitedStartStr != "" && splitedDestStr != "" )
         {
-            CalculateRoute(splitedStartStr[1], splitedStartStr[0], splitedDestStr[1], splitedDestStr[0]);
+            var lonlatStart = new Tmap.LonLat(splitedStartStr[1], splitedStartStr[0]);
+            lonlatStart.transform("EPSG:4326", "EPSG:3857");
+            var lonlatDest = new Tmap.LonLat(splitedDestStr[1], splitedDestStr[0]);
+            lonlatDest.transform("EPSG:4326", "EPSG:3857");
+            CalculateRoute(lonlatStart, [], lonlatDest);
         }
     </script>
 </html>
