@@ -1,3 +1,1 @@
-Hello.
-
-This is my Tmap server.
+This is used for coordinate change for kakao map and calculating T-map route on desktop.
