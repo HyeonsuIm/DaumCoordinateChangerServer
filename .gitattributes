@@ -1,2 +1,2 @@
-DaumCoordinateChangerServer/venv/* linguist-vendored
-GetCoordinateClient/venv/* linguist-vendored
+DaumCoordinateChangerServer/venv/** linguist-vendored
+GetCoordinateClient/venv/** linguist-vendored
