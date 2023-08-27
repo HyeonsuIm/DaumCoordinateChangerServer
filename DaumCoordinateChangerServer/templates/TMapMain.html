@@ -42,7 +42,7 @@
                                 <i class='fas fa-ellipsis-v fa-lg'></i>
                             </span>
                             <span>
-                                <input class='WayInputBox' id='WayPointInput' v-bind:value="waypoint.value">
+                                <input class='WayInputBox' id='WayPointInput' v-model="waypoint.value">
                             </span>
                             <span>
                                 <i class='far fa-times-circle fa-lg' onclick='RemoveWaypoint(this)'></i>
@@ -59,12 +59,14 @@
                     </span>
                 </div>
                 <div>
-                    <button class="btn btn-outline-secondary"onclick="AddWaypoint()">경유지 추가</button></p>
+                    <button class="btn btn-outline-secondary"onclick="AddWaypoint()">경유지 추가</button>
+                    <button class="btn btn-outline-secondary"onclick="StartRouteBtn()">경로 탐색</button>
                 </div>
             </div>
             <div id="leftResult" class="leftBox">
                 <p>${distance}</p>
                 <p>${time}</p>
+                <p>${fee}</p>
             </div>
         </div>
         <div id="tmap_main_frame">

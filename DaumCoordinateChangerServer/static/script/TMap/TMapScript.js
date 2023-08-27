@@ -14,7 +14,8 @@ var route_result_view = new Vue({
     el: '#leftResult',
     data: {
         distance:"",
-        time:""
+        time:"",
+        fee:""
     }
   })
 // 1. 지도 띄우기
@@ -70,18 +71,18 @@ function AddWaypoint()
 
 function RemoveWaypoint(clickedTag)
 {
-    var wayPointList = $("#leftWayInput").children('div');
-    var sortId = clickedTag.parentNode.parentNode.getAttribute('sortid');
-    var index = 0;
-    for( ; index < wayPointList.length ; ++index)
+    let waypointList = waypoint_list_view.waypointList
+    let sortId = clickedTag.parentNode.parentNode.getAttribute('sortid');
+    for( var index = 0; index < waypointList.length ; ++index)
     {
-        if( wayPointList[index].getAttribute('sortid') == sortId )
+        if( waypointList[index].id == sortId )
         {
+            waypointList.splice(index, 1)
+            RemoveWayMarker(index)
             break;
         }
     }
-    wayPointList[index].remove();
-    SortWaypoint();
+    StartRoute()
 }
 
 function SortWaypoint()
@@ -124,7 +125,6 @@ function SetStartingPoint(e)
     SetStartMarker();
 
     StartRoute();
-    RefreshView();
 }
 
 function SetWayPoint()
@@ -133,7 +133,6 @@ function SetWayPoint()
     SetWayMarker();
 
     StartRoute();
-    RefreshView();
 }
 
 function SetDestination()
@@ -142,7 +141,21 @@ function SetDestination()
     SetDestMarker();
 
     StartRoute();
-    RefreshView();
+}
+
+function StartRouteBtn()
+{
+    ClearWaypointMarker()
+    let waypointList = waypoint_list_view.waypointList
+    for(let index=0;index< waypointList.length;++index)
+    {
+        coordinate = waypointList[index].value.split(',')
+
+        let lonlat = new Tmap.LonLat(coordinate[1], coordinate[0])
+        SetLastMarker(lonlat)
+        SetWayMarker()
+    }
+    StartRoute()
 }
 
 var routeLayer;
@@ -276,6 +289,7 @@ function CalculateRoute(startLonLat, wayLonLatList, destLonLat)
             var timeSec = $intRate[0].getElementsByTagName("tmap:totalTime")[0].childNodes[0].nodeValue;
             route_result_view.distance = " 총 거리 : "+($intRate[0].getElementsByTagName("tmap:totalDistance")[0].childNodes[0].nodeValue/1000).toFixed(2)+"km";
             route_result_view.time = "총 시간 : "+ Math.floor(timeSec/60/60) + "시간 " + Math.floor(timeSec/60%60) + "분 " + (timeSec&60).toFixed(0) + "초";
+            route_result_view.fee = "총 요금 : "+ $intRate[0].getElementsByTagName("tmap:totalFare")[0].childNodes[0].nodeValue+"원";
 		    RemoveContextMenu();
         },
         error:function(request,status,error){

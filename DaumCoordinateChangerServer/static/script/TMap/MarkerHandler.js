@@ -72,7 +72,6 @@ function GetLastMarker(){
 }
 
 
-var wayPntCnt = 0;
 function SetWayMarker(){
     var icon = new Tmap.IconHtml("<img src='http://tmapapis.sktelecom.com/upload/tmap/marker/pin_b_m_a.png' />", size, offset);
     
@@ -84,6 +83,14 @@ function SetWayMarker(){
                             currentWayCnt++);
     ClearLastMarker();
     markerList.push(marker);
+}
+
+function RemoveWayMarker(idx){
+    markerList = markerList.filter(function(x){return x.markerType != MarkerType.WAY && x.no != idx})
+}
+
+function ClearWaypointMarker(idx){
+    markerList = markerList.filter(function(x){return x.markerType != MarkerType.WAY});
 }
 
 function GetWayMarkers(){
