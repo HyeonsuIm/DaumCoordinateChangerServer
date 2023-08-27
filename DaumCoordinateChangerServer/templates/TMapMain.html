@@ -10,26 +10,23 @@
         <script src="https://api2.sktelecom.com/tmap/js?version=1&format=javascript&appKey=dc65b12b-9750-4e55-a14b-54d192a0f496"></script>
         <!-- ajax -->
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <!-- bootstrap -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+
+
         <!-- jQuery -->
         <script>window.jQuery || document.write('<script src="{{
         url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
 
-        <script src="/static/script/TMap/TMapScript.js"></script>
-        <script src="/static/script/TMap/MarkerHandler.js"></script>
         <link rel="stylesheet" href="/static/CSS/TMapCSS.css">
     </head>
     <body>
-        <div id="header">
-            <div id="tmap_head">
-                <!--
-                <input type="text" id="searchQuery">
-                <p id="result"></p>
-                <button id="tmap_route_start_btn" Onclick="Search()"/>
-                -->
-            </div>
-        </div>
         <div id="left">
-            <div id="leftInput">
+            <div id="leftHeader" class="leftBox">
+                {# 검색 : <input type="text" id="searchQuery">
+                <button id="tmap_route_start_btn" Onclick="Search()">btn</button> #}
+            </div>
+            <div id="leftInput" class="leftBox">
                 <div class='waypointBoxView'>
                     <span style="color:darkcyan">
                         <i class="fas fa-car fa-lg"></i>
@@ -39,25 +36,47 @@
                     </span>
                 </div>
                 <div id="leftWayInput">
+                    <template v-for="waypoint in waypointList">
+                        <div class='waypointBoxView' v-bind:sortid="waypoint.id">
+                            <span style='color:darkcyan'>
+                                <i class='fas fa-ellipsis-v fa-lg'></i>
+                            </span>
+                            <span>
+                                <input class='WayInputBox' id='WayPointInput' v-bind:value="waypoint.value">
+                            </span>
+                            <span>
+                                <i class='far fa-times-circle fa-lg' onclick='RemoveWaypoint(this)'></i>
+                            </span>
+                        </div>
+                    </template>
                 </div>
                 <div class='waypointBoxView'>
                     <span style="color:darkcyan">
                         <i class="fas fa-flag fa-lg"></i>
                     </span>
                     <span>
-                        <input class=WayInputBox id="DestinationPointInput">
+                        <input class='WayInputBox' id="DestinationPointInput">
                     </span>
                 </div>
                 <div>
-                    <button onclick="AddWaypoint()">경유지 추가</button></p>
+                    <button class="btn btn-outline-secondary"onclick="AddWaypoint()">경유지 추가</button></p>
                 </div>
+            </div>
+            <div id="leftResult" class="leftBox">
+                <p>${distance}</p>
+                <p>${time}</p>
             </div>
         </div>
         <div id="tmap_main_frame">
             <div id="map_div"></div>
         </div>
     </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <!-- vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
+    <script src="/static/script/TMap/TMapScript.js"></script>
+    <script src="/static/script/TMap/MarkerHandler.js"></script>
     <script>
         var startStr = '{{start}}'
         var destStr = '{{dest}}'

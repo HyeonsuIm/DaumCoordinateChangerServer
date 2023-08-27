@@ -82,7 +82,7 @@ function SetWayMarker(){
                             lonlat,
                             MarkerType.WAY,
                             currentWayCnt++);
-    
+    ClearLastMarker();
     markerList.push(marker);
 }
 

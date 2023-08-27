@@ -2,6 +2,21 @@ window.addEventListener("contextmenu", e => {
   e.preventDefault();
 });
 
+var waypoint_list_view = new Vue({
+    el: '#leftWayInput',
+    data: {
+        waypointList:[]
+    }
+  })
+
+var route_result_view = new Vue({
+    delimiters: ['${', '}'],
+    el: '#leftResult',
+    data: {
+        distance:"",
+        time:""
+    }
+  })
 // 1. 지도 띄우기
 var map;
 var markerLayer;
@@ -48,24 +63,9 @@ function RemoveContextMenu()
     $("div.map-custom-menu").remove();
 }
 
-var wayPointInfo = {
-    cnt:0
-};
-
 function AddWaypoint()
-{               
-    $("<div class='waypointBoxView' sortid='" + wayPointInfo.cnt++ + "'>" +
-        "<span style='color:darkcyan'>" +
-            "<i class='fas fa-ellipsis-v fa-lg'></i>" +
-        "</span>" +
-        "<span>" +
-            " <input class='WayInputBox' id='WayPointInput'>" +
-        "</span>" +
-        "<span>" +
-            "<i class='far fa-times-circle fa-lg' onclick='RemoveWaypoint(this)'></i>" +
-        "</span>" +
-      "</div>")
-        .appendTo("#leftWayInput");
+{              
+    waypoint_list_view.waypointList.push({id:waypoint_list_view.waypointList.length, value:""}) 
 }
 
 function RemoveWaypoint(clickedTag)
@@ -174,28 +174,30 @@ function RefreshView(){
         markerLayer.addMarker(marker.marker);
     }
     
+    waypoint_list_view.waypointList.splice(0, waypoint_list_view.waypointList.length)
+    let sortId = 0
     for( var index = 0 ; index < markerList.length ; ++index ){
         var marker = markerList[index];
-        if( index == 0 ){
+        if( marker.markerType == MarkerType.START ){
             $("#StartPointInput").val(marker.lonlat.lat.toFixed(5)+ "," + marker.lonlat.lon.toFixed(5) );
         }
-        else if( index == markerList.length - 1 ){
+        else if( marker.markerType == MarkerType.DEST ){
             $("#DestinationPointInput").val(marker.lonlat.lat.toFixed(5)+ "," + marker.lonlat.lon.toFixed(5) );
         }
-        else{
-            
+        else if( marker.markerType == MarkerType.WAY ){
+            waypoint_list_view.waypointList.push({id:sortId.toString(),value:marker.lonlat.lat.toFixed(5)+ "," + marker.lonlat.lon.toFixed(5)})
+            sortId+=1
         }
-        
     }
 }
 
 function CalculateRoute(startLonLat, wayLonLatList, destLonLat)
 {
-    var startX = startLonLat.lon;
-    var startY = startLonLat.lat;
-    var endX = destLonLat.lon;
-    var endY = destLonLat.lat;
-    var viaPointList = wayLonLatList.map(function(x){
+    let startX = startLonLat.lon;
+    let startY = startLonLat.lat;
+    let endX = destLonLat.lon;
+    let endY = destLonLat.lat;
+    let viaPointList = wayLonLatList.map(function(x){
         return {
             "viaPointId" : "test01",//경유지 id
             "viaPointName" : "nmae01",//경유지 명칭
@@ -203,75 +205,38 @@ function CalculateRoute(startLonLat, wayLonLatList, destLonLat)
             "viaY" : x.lat.toString()};
     });
     
-    var prtcl;
-    var headers = {
+    let prtcl;
+    let headers = {
         "appKey" : "dc65b12b-9750-4e55-a14b-54d192a0f496",
     };
     
     
-    var urlWithoutWayPoint = "https://api2.sktelecom.com/tmap/routes?version=1&format=xml";
-    var urlWithWayPoint = "https://api2.sktelecom.com/tmap/routes/routeSequential30?version=1&format=xml";
+    let urlWithoutWayPoint = "https://api2.sktelecom.com/tmap/routes?version=1&format=xml";
     
-    var url;
-    var data; 
-    var trafficColors;
-    if( 0 == viaPointList.length ){
-        url = urlWithoutWayPoint;
-        data = {
-                "startX" : startX,
-                "startY" : startY,
-                "endX" : endX,
-                "endY" : endY,
-            
-                "reqCoordType" : "EPSG3857",
-                "resCoordType" : "EPSG3857",
-                "angle" : "172",
-                "searchOption" : 0,
-                "trafficInfo" : "Y"
-        };//교통정보 표출 옵션입니다.
-        
-        trafficColors = {
-            extractStyles:true,
-
-            /* 실제 교통정보가 표출되면 아래와 같은 Color로 Line이 생성됩니다. */
-            trafficDefaultColor:"#000000", //Default
-            trafficType1Color:"#009900", //원할
-            trafficType2Color:"#FFC000", //지체
-            trafficType3Color:"#FF0000", //정체
-        };
+    let url;
+    let data; 
+    url = urlWithoutWayPoint;
+    let viaString = "";
+    for( let i=0;i<viaPointList.length;i++)
+    {
+        if(viaString) viaString+="_";
+        viaString += viaPointList[i].viaX+","+viaPointList[i].viaY+",0,0";
     }
-    else{
-        url = urlWithWayPoint;
-        data = JSON.stringify({
-                "startName" : "출발지",
-                "startX" : startX.toString(),
-                "startY" : startY.toString(),
-                "startTime" : "201708081103",//출발 시간(YYYYMMDDHHMM)
-                
-                "endName" : "목적지",
-                "endX" : endX.toString(),
-                "endY" : endY.toString(),
-            
-                "viaPoints" : viaPointList,
-            
-                "reqCoordType" : "EPSG3857",
-                "resCoordType" : "EPSG3857",
-                "angle" : "172",
-                "searchOption" : "0",
-                "trafficInfo" : "Y"
-       });//교통정보 표출 옵션입니다.
-        headers["Content-Type"] = "application/json";
-        
-        trafficColors = {
-            extractStyles:true,
 
-            /* 실제 교통정보가 표출되면 아래와 같은 Color로 Line이 생성됩니다. */
-            trafficDefaultColor:"#FF0000", //Default
-            trafficType1Color:"#009900", //원할
-            trafficType2Color:"#FFC000", //지체
-            trafficType3Color:"#FF0000", //정체
-        };
-    }
+    data = {
+            "startX" : startX,
+            "startY" : startY,
+            "endX" : endX,
+            "endY" : endY,
+
+            "passList" : viaString,
+
+            "reqCoordType" : "EPSG3857",
+            "resCoordType" : "EPSG3857",
+            "angle" : "172",
+            "searchOption" : 0,
+            "trafficInfo" : "Y"
+    };//교통정보 표출 옵션입니다.
     
     $.ajax({
         method:"POST",
@@ -286,6 +251,16 @@ function CalculateRoute(startLonLat, wayLonLatList, destLonLat)
             if( typeof routeLayer !== 'undefined'){
                 routeLayer.removeAllFeatures();//레이어의 모든 도형을 지웁니다.
             }
+            let trafficColors = {
+                extractStyles:true,
+        
+                /* 실제 교통정보가 표출되면 아래와 같은 Color로 Line이 생성됩니다. */
+                trafficDefaultColor:"#FF0000", //Default
+                trafficType1Color:"#009900", //원할
+                trafficType2Color:"#FFC000", //지체
+                trafficType3Color:"#FF0000", //정체
+            };
+
             var kmlForm = new Tmap.Format.KML(trafficColors).readTraffic(prtcl);
             routeLayer = new Tmap.Layer.Vector("vectorLayerID"); //백터 레이어 생성
             routeLayer.addFeatures(kmlForm); //교통정보를 백터 레이어에 추가
@@ -298,11 +273,9 @@ function CalculateRoute(startLonLat, wayLonLatList, destLonLat)
             xmlDoc = $.parseXML( prtclString ),
             $xml = $( xmlDoc ),
             $intRate = $xml.find("Document");
-            var tDistance = " 총 거리 : "+($intRate[0].getElementsByTagName("tmap:totalDistance")[0].childNodes[0].nodeValue/1000).toFixed(2)+"km<br>";
             var timeSec = $intRate[0].getElementsByTagName("tmap:totalTime")[0].childNodes[0].nodeValue;
-            var tTime = " 총 시간 : "+ Math.floor(timeSec/60/60) + "시간 " + Math.floor(timeSec/60%60) + "분 " + (timeSec&60).toFixed(0) + "초";
-            var resultDiv = document.getElementById("result");
-            resultDiv.innerHTML = tDistance + tTime;
+            route_result_view.distance = " 총 거리 : "+($intRate[0].getElementsByTagName("tmap:totalDistance")[0].childNodes[0].nodeValue/1000).toFixed(2)+"km";
+            route_result_view.time = "총 시간 : "+ Math.floor(timeSec/60/60) + "시간 " + Math.floor(timeSec/60%60) + "분 " + (timeSec&60).toFixed(0) + "초";
 		    RemoveContextMenu();
         },
         error:function(request,status,error){
