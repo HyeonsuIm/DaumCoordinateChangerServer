@@ -72,6 +72,11 @@
         <div id="tmap_main_frame">
             <div id="map_div"></div>
         </div>
+        <div id='map-custom-menu' class='map-custom-menu' v-if="visible" v-bind:style="{top:y + 'px', left:x + 'px'}">
+            <button onclick='SetStartingPoint()'>출발</button><br>
+            <button onclick='SetWayPoint()'>경유</button><br>
+            <button onclick='SetDestination()'>목적</button>
+        </div>
     </body>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <!-- vue -->

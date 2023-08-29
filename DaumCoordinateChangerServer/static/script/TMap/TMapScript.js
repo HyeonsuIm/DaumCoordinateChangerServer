@@ -18,6 +18,16 @@ var route_result_view = new Vue({
         fee:""
     }
   })
+
+var map_custom_menu = new Vue({
+    delimiters: ['${', '}'],
+    el: '#map-custom-menu',
+    data:{
+        visible:false,
+        x:0,
+        y:0
+    }
+})
 // 1. 지도 띄우기
 var map;
 var markerLayer;
@@ -45,15 +55,10 @@ function OnMouseDown(e)
     var lonlat = map.getLonLatFromViewPortPx(e.xy).transform("EPSG:3857", "EPSG:4326");//클릭한 부분의 ViewPorPx를 LonLat로 변환합니다
     SetLastMarker(lonlat);
 
-    $("<div class='map-custom-menu'>" +
-        "<button onclick='SetStartingPoint()'>출발</button>" +
-        "<br>" +
-        "<button onclick='SetWayPoint()'>경유</button>" +
-        "<br>" +
-        "<button onclick='SetDestination()'>목적</button>" +
-    "</div>")
-    .appendTo("body")
-    .css({top: e.pageY + "px", left: e.pageX + "px"});
+    map_custom_menu.x = e.pageX
+    map_custom_menu.y = e.pageY
+    map_custom_menu.visible = true
+
     RefreshView();
     e.preventDefault();
     return false;
@@ -61,7 +66,7 @@ function OnMouseDown(e)
 
 function RemoveContextMenu()
 {
-    $("div.map-custom-menu").remove();
+    map_custom_menu.visible=false
 }
 
 function AddWaypoint()
@@ -83,40 +88,6 @@ function RemoveWaypoint(clickedTag)
         }
     }
     StartRoute()
-}
-
-function SortWaypoint()
-{
-//    var wayPointList = $("#leftWayInput").children('div');
-//    var currentSortId = 0;
-//    
-//    for( ; currentSortId < wayPointList.length ; ++currentSortId )
-//    {
-//        //get minimum sort id
-//        var minimumSortId = wayPointList[currentSortId].getAttribute('sortid');
-//        var minimumSortIdIdx = currentSortId;
-//        var checkIdx = currentSortId + 1;
-//        var isFind = false;
-//        for( ; checkIdx < wayPointList.length ; ++checkIdx)
-//        {
-//            if ( minimumSortId > wayPointList[checkIdx].getAttribute('sortid') )
-//            {
-//                minimumSortId = wayPointList[checkIdx].getAttribute('sortid');
-//                minimumSortIdIdx = checkIdx;
-//                break;
-//            }
-//        }
-//    }
-//    
-//    var index = 0;
-//    for( ; index < wayPointList.length ; ++index)
-//    {
-//        if( wayPointList[index].getAttribute('sortid') == sortId )
-//        {
-//            break;
-//        }
-//    }
-//    wayPointList[index].remove();
 }
 
 function SetStartingPoint(e)
